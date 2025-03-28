@@ -14,10 +14,6 @@
         <h1 class="titulo">CRUD para gestão de etiquetas</h1>
     </header>
 
-    <?php
-
-    ?>
-
     <main>
 
         <h2>Cadastro de produto</h2>
@@ -42,7 +38,7 @@
                 VALUES ($preco, '$nome');";
 
             if (mysqli_query($conexao, $sql_code)) {
-                echo "<p>Registrado produto $nome</p>";
+                echo "<p>Produto $nome registrado com sucesso</p>";
             } else {
                 echo "<p>Produto não registrado</p>";
             }
@@ -88,7 +84,6 @@
             }
         }
 
-
         ?>
 
         <h2>Atualização de produto</h2>
@@ -97,7 +92,6 @@
             <select name="nome_atualizacao">
                 <option selected>Selecione</option>
                 <?php
-                include("database.php");
 
                 $sql_code = "SELECT * FROM etiquetas";
 
@@ -116,11 +110,11 @@
         </form>
 
         <?php
-        if (isset($_GET["preco_atualizado"]) && isset($_GET["nome_atualizacao"])) {
+        if (isset($_GET["preco_atualizado"]) && isset($_GET["nome_atualizacao"]) && $_GET["nome_atualizacao"] !== "Selecione") {
+
             $preco_atualizado = $_GET["preco_atualizado"];
             $nome_atualizacao = $_GET["nome_atualizacao"];
 
-            include("database.php");
 
             $sql_code = "UPDATE etiquetas SET preco = '$preco_atualizado' WHERE nome = '$nome_atualizacao'";
 
@@ -136,9 +130,8 @@
         <form action="<?= $_SERVER['PHP_SELF']; ?>" method="get">
             <select name="nome_excluir">
                 <option selected>Selecione</option>
-                <?php
-                include("database.php");
 
+                <?php
                 $sql_code = "SELECT * FROM etiquetas";
 
                 if (mysqli_query($conexao, $sql_code)) {
@@ -147,13 +140,14 @@
                         echo "<option value='$linha[nome]'>$linha[nome]</option>";
                     }
                 }
-
                 ?>
+
             </select>
             <input type="submit">
         </form>
+
         <?php
-        if (isset($_GET["nome_excluir"])) {
+        if (isset($_GET["nome_excluir"]) && $_GET["nome_excluir"] !== "Selecione") {
             $produto_excluir = $_GET["nome_excluir"];
             $sql_code = "DELETE FROM etiquetas WHERE nome = '$produto_excluir'";
 
