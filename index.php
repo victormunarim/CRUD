@@ -10,6 +10,23 @@
 
 <body>
 
+    <?php
+    include("database.php");
+    //pegar todos os dados e botar em option
+    function botarDadosEmOption()
+    {
+        include("database.php");
+        $sqlCodigo = "SELECT * FROM etiquetas";
+
+        if (mysqli_query($conexao, $sqlCodigo)) {
+            $dados = mysqli_query($conexao, $sqlCodigo);
+            while ($linha = mysqli_fetch_assoc($dados)) {
+                echo "<option value='$linha[nome]'>$linha[nome]</option>";
+            }
+        }
+    }
+    ?>
+
     <header>
         <h1 class="titulo">CRUD para gestão de etiquetas</h1>
     </header>
@@ -21,35 +38,35 @@
             <form action="<?= $_SERVER['PHP_SELF']; ?>" method="get">
                 <div>
                     <div class="caixa">
-                        <label for="nome_cadastro">Nome:</label>
-                        <input type="text" name="nome_cadastro">
+                        <label for="nomeCadastrar">Nome:</label>
+                        <input required type="text" name="nomeCadastrar">
                     </div>
                     <div class="caixa">
-                        <label for="preco_cadastro">Preço:</label>
-                        <input step="0.01" type="number" name="preco_cadastro">
+                        <label for="precoCadastrar">Preço:</label>
+                        <input required step="0.01" type="number" name="precoCadastrar">
                     </div>
                 </div>
                 <?php
-                include("database.php");
+                //validar se os dados a cadastrar existem
+                if (!empty($_GET["nomeCadastrar"]) && !empty($_GET["precoCadastrar"])) {
 
-                if (!empty($_GET["nome_cadastro"]) && !empty($_GET["preco_cadastro"])) {
+                    $nomeCadastrar = $_GET["nomeCadastrar"];
+                    $precoCadastrar = $_GET["precoCadastrar"];
 
-                    $nome = $_GET["nome_cadastro"];
-                    $preco = $_GET["preco_cadastro"];
+                    $sqlCodigo = "INSERT INTO etiquetas (preco, nome)
+                    VALUES ($precoCadastrar, '$nomeCadastrar');";
 
-                    $sql_code = "INSERT INTO etiquetas (preco, nome)
-                VALUES ($preco, '$nome');";
+                    $sqlCodigo_completo = "SELECT * FROM etiquetas WHERE nome = '$nomeCadastrar';";
 
-                    $sql_code_completo = "SELECT * FROM etiquetas WHERE nome = '$nome';";
-
-                    if (mysqli_query($conexao, $sql_code_completo)) {
-                        $dados = mysqli_query($conexao, $sql_code_completo);
+                    //inserir os dados na tabela
+                    if (mysqli_query($conexao, $sqlCodigo_completo)) {
+                        $dados = mysqli_query($conexao, $sqlCodigo_completo);
                         if (mysqli_fetch_assoc($dados)) {
                             $linha = mysqli_fetch_assoc($dados);
-                            echo "<p>Produto $nome ja exite</p>";
-                        }else {
-                            if (mysqli_query($conexao, $sql_code)) {
-                                echo "<p>Produto $nome registrado com sucesso</p>";
+                            echo "<p>Produto $nomeCadastrar ja exite</p>";
+                        } else {
+                            if (mysqli_query($conexao, $sqlCodigo)) {
+                                echo "<p>Produto $nomeCadastrar registrado com sucesso</p>";
                             }
                         }
                     }
@@ -64,30 +81,21 @@
             <h2>Leitura de produto</h2>
 
             <form action="<?= $_SERVER['PHP_SELF']; ?>" method="get">
-                <select class="caixa" name="produto_leitura">
+                <select class="caixa" name="produtoLer">
                     <option selected>Selecione</option>
                     <?php
-                    include("database.php");
-
-                    $sql_code = "SELECT * FROM etiquetas";
-
-                    if (mysqli_query($conexao, $sql_code)) {
-                        $dados = mysqli_query($conexao, $sql_code);
-                        while ($linha = mysqli_fetch_assoc($dados)) {
-                            echo "<option value='$linha[nome]'>$linha[nome]</option>";
-                        }
-                    }
-
+                    botarDadosEmOption()
                     ?>
                 </select>
                 <?php
+                //ver se o dados a ler existem
+                if (!empty($_GET["produtoLer"])) {
+                    $produtoLer = $_GET["produtoLer"];
+                    $sqlCodigo = "SELECT * FROM etiquetas WHERE nome = '$produtoLer'";
 
-                if (isset($_GET["produto_leitura"])) {
-                    $produtoEscolhido = $_GET["produto_leitura"];
-                    $sql_code = "SELECT * FROM etiquetas WHERE nome = '$produtoEscolhido'";
-
-                    if (mysqli_query($conexao, $sql_code)) {
-                        $dados = mysqli_query($conexao, $sql_code);
+                    //pegar somente o dado selecionado para leitura
+                    if (mysqli_query($conexao, $sqlCodigo)) {
+                        $dados = mysqli_query($conexao, $sqlCodigo);
                         $linha = mysqli_fetch_assoc($dados);
                         if (isset($linha)) {
                             echo "<p>ID: $linha[produtoID] - Nome: $linha[nome] - Preco: R$$linha[preco]</p>";
@@ -106,38 +114,32 @@
 
             <form action="<?= $_SERVER['PHP_SELF']; ?>" method="get">
                 <div>
-                    <select class="caixa" name="nome_atualizacao">
+                    <select class="caixa" name="nomeAtualizar">
                         <option selected>Selecione</option>
                         <?php
-
-                        $sql_code = "SELECT * FROM etiquetas";
-
-                        if (mysqli_query($conexao, $sql_code)) {
-                            $dados = mysqli_query($conexao, $sql_code);
-                            while ($linha = mysqli_fetch_assoc($dados)) {
-                                echo "<option value='$linha[nome]'>$linha[nome]</option>";
-                            }
-                        }
-
+                        botarDadosEmOption()
                         ?>
                     </select>
                     <div class="caixa">
-                        <label for="preco_atualizado">Preço:</label>
-                        <input step="0.01" type="number" name="preco_atualizado">
+                        <label for="precoAtualizar">Preço:</label>
+                        <input required step="0.01" type="number" name="precoAtualizar">
                     </div>
 
                 </div>
                 <?php
-                if (!empty($_GET["preco_atualizado"]) && isset($_GET["nome_atualizacao"]) && $_GET["nome_atualizacao"] !== "Selecione") {
 
-                    $preco_atualizado = $_GET["preco_atualizado"];
-                    $nome_atualizacao = $_GET["nome_atualizacao"];
+                //validar se os dados a atualizar existem
+                if (!empty($_GET["precoAtualizar"]) && !empty($_GET["nomeAtualizar"]) && $_GET["nomeAtualizar"] !== "Selecione") {
+
+                    $precoAtualizar = $_GET["precoAtualizar"];
+                    $nomeAtualizar = $_GET["nomeAtualizar"];
 
 
-                    $sql_code = "UPDATE etiquetas SET preco = '$preco_atualizado' WHERE nome = '$nome_atualizacao'";
+                    $sqlCodigo = "UPDATE etiquetas SET preco = '$precoAtualizar' WHERE nome = '$nomeAtualizar'";
 
-                    if (mysqli_query($conexao, $sql_code)) {
-                        echo "<p>Produto $nome_atualizacao atualizado com sucesso</p>";
+                    //atualizar os dados na tabela
+                    if (mysqli_query($conexao, $sqlCodigo)) {
+                        echo "<p>Produto $nomeAtualizar atualizado com sucesso</p>";
                     }
                 }
 
@@ -151,36 +153,31 @@
             <h2>Deletar produto</h2>
 
             <form action="<?= $_SERVER['PHP_SELF']; ?>" method="get">
-                <select class="caixa" name="nome_excluir">
+                <select class="caixa" name="nomeExcluir">
                     <option selected>Selecione</option>
 
                     <?php
-                    $sql_code = "SELECT * FROM etiquetas";
-
-                    if (mysqli_query($conexao, $sql_code)) {
-                        $dados = mysqli_query($conexao, $sql_code);
-                        while ($linha = mysqli_fetch_assoc($dados)) {
-                            echo "<option value='$linha[nome]'>$linha[nome]</option>";
-                        }
-                    }
+                    botarDadosEmOption()
                     ?>
 
                 </select>
                 <?php
-                if (isset($_GET["nome_excluir"]) && $_GET["nome_excluir"] !== "Selecione") {
-                    $produto_excluir = $_GET["nome_excluir"];
-                    $sql_code = "DELETE FROM etiquetas WHERE nome = '$produto_excluir'";
 
-                    if (mysqli_query($conexao, $sql_code)) {
-                        echo "<p>Produto: $produto_excluir excluido com sucesso</p>";
+                //validar se os dados a excluir existem
+                if (!empty($_GET["nomeExcluir"]) && $_GET["nomeExcluir"] !== "Selecione") {
+                    $produtoExcluir = $_GET["nomeExcluir"];
+
+                    $sqlCodigo = "DELETE FROM etiquetas WHERE nome = '$produtoExcluir'";
+
+                    //excluir os dados da tabela
+                    if (mysqli_query($conexao, $sqlCodigo)) {
+                        echo "<p>Produto: $produtoExcluir excluido com sucesso</p>";
                     }
                 }
                 ?>
                 <input class="enviar" type="submit">
             </form>
-
         </div>
-
     </main>
 
 </body>
