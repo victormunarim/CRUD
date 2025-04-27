@@ -1,5 +1,4 @@
 <?php
-
 include "database.php";
 ?>
 
@@ -16,40 +15,29 @@ include "database.php";
 <body>
 
 <?php
-
 class Itens
 {
-    public $produtoID;
-    public $nome;
-    public $preco;
+    public $conexao;
 
-    public function __construct($produtoID, $nome, $preco)
+    public function __construct($conexao)
     {
-        $this->produtoID = $produtoID;
-        $this->nome = $nome;
-        $this->preco = $preco;
-    }
-
-    public function botarDadosEmOption()
-    {
-        return "<option value='$this->nome'>$this->nome</option>";
+        $this->conexao = $conexao;
     }
 
     public function SepararDadosEOptions()
     {
-        include "database.php";
-        if ($dados = $conexao->query("SELECT * FROM etiquetas;")) {
+        $options = "";
+        if ($dados = $this->conexao->query("SELECT * FROM etiquetas;")) {
             while ($linha = $dados->fetch_assoc()) {
-                $this->produtoID = $linha['produtoID'];
-                $this->nome = $linha['nome'];
-                $this->preco = $linha['preco'];
-                echo $this->botarDadosEmOption();
+                $nome = $linha['nome'];
+                $options .= "<option value='$nome'>$nome</option>";
             }
+            return $options;
         }
     }
 }
 
-
+$itens = new Itens($conexao);
 ?>
 
 <header>
@@ -104,8 +92,7 @@ class Itens
             <select class="caixa" name="produtoLer">
                 <option selected>Selecione</option>
                 <?php
-                $leitura = new Itens(null, null, null);
-                echo $leitura->SepararDadosEOptions();
+                echo $itens->SepararDadosEOptions();
                 ?>
             </select>
             <?php
@@ -136,8 +123,7 @@ class Itens
                 <select class="caixa" name="nomeAtualizar">
                     <option selected>Selecione</option>
                     <?php
-                    $atualizacao = new Itens(null, null, null);
-                    echo $atualizacao->SepararDadosEOptions();
+                    echo $itens->SepararDadosEOptions();
                     ?>
                 </select>
                 <div class="caixa">
@@ -170,10 +156,8 @@ class Itens
         <form action="<?= $_SERVER['PHP_SELF']; ?>" method="get">
             <select class="caixa" name="nomeExcluir">
                 <option selected>Selecione</option>
-
                 <?php
-                $deletar = new Itens(null, null, null);
-                echo $deletar->SepararDadosEOptions();
+                echo $itens->SepararDadosEOptions();
                 ?>
 
             </select>
